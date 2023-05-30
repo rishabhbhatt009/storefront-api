@@ -37,7 +37,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "playground"
+
+    ### added new apps 
+    "playground", 
+    "store",
+    "tags" 
 ]
 
 MIDDLEWARE = [
