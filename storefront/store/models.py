@@ -2,28 +2,32 @@ from django.db import models
 
 # Create your models here.
 
-### Entities
+class Promotion(models.Model):
+    description = models.CharField(max_length=250)
+    discount = models.FloatField()
 
-# Entity 
-class Product(models.Model):
+
+class Collection(models.Model):
+
+    # fields 
+    title = models.CharField(max_length=255)
+    featured_product = models.ForeignKey(to='Product', on_delete=models.SET_NULL, null=True, related_name='+')
     
+
+class Product(models.Model):    
+
     # fields
-    # Docs : https://docs.djangoproject.com/en/4.2/ref/models/fields/#model-field-types 
     title = models.CharField(max_length=250)
     description = models.TextField()
     price = models.DecimalField(max_digits=6, decimal_places=2)
     inventory = models.IntegerField()
     last_update = models.DateTimeField(auto_now=True)
-    
-### Entity  
-class Collection(models.Model):
 
-    # fields 
-    title = models.CharField(max_length=255)
     # relationships
-    product = models.ForeignKey(to=Product, on_delete=models.PROTECT)
+    collection = models.ForeignKey(to=Collection, on_delete=models.PROTECT)
+    promotions = models.ManyToManyField(to=Promotion)
+    
 
-# Entity
 class Customer(models.Model):
     
     MEMBERSHIP_DEFAULT = 'STD'
@@ -42,10 +46,7 @@ class Customer(models.Model):
     birth_date = models.DateField(null=True)
     membership = models.CharField(max_length=3, choices=MEMBERSHIP_CHOICES, default=MEMBERSHIP_DEFAULT)
 
-    # relationships
-    order = models.ForeignKey(to='Order', on_delete=models.CASCADE)
 
-# Entity 
 class Order(models.Model):
     
     PAYMENT_DEFAULT = 'P'
@@ -59,43 +60,49 @@ class Order(models.Model):
     # fields
     placed_at = models.DateTimeField(auto_now=True)
     payment_status = models.CharField(max_length=1, choices=PAYMENT_CHOICES, default=PAYMENT_DEFAULT)
+    
     # relationships
-    item = models.ForeignKey(to='OrderItem', on_delete=models.PROTECT) ### never be deleted since we should preserve sales
+    customer = models.ForeignKey(to=Customer, on_delete=models.PROTECT)
+    # item = models.ForeignKey(to='OrderItem', on_delete=models.PROTECT) ### never be deleted since we should preserve sales
 
 
-### Entity
+class OrderItem(models.Model):
+   
+    # filed 
+    quantity = models.PositiveSmallIntegerField()
+    unit_price = models.DecimalField(max_digits=6, decimal_places=2)
+    
+    # relationships 
+    order = models.ForeignKey(to=Order, on_delete=models.PROTECT)
+    product = models.ForeignKey(to=Product, on_delete=models.PROTECT)
+    
+
 class Address(models.Model):
     '''
     1-1 relationship between customer and address
-    Customer(parent) ---> Address(child)
+    Customer(parent) <--- Address(child)
     
     '''
     # fields
     street = models.CharField(max_length=250)
     city = models.CharField(max_length=250) 
-    # relationships 
-    customer = models.OneToOneField(to=Customer, on_delete=models.CASCADE, primary_key=True)
-
-### Entity  
-class Cart(models.Model):
-
-    # fields
-    created_at = models.DateTimeField(auto_now_add=True)
-    item_count = models.AutoField()
-    # relationships 
-    item = models.ForeignKey(to='CartItem', on_delete=models.CASCADE)    
-
-### Entity 
-class OrderItem(models.Model):
-    # filed 
     
     # relationships 
-    pass
+    # customer = models.OneToOneField(to=Customer, on_delete=models.CASCADE, primary_key=True)
+    customer = models.ForeignKey(to=Customer, on_delete=models.CASCADE)
 
-### Entity 
+
+class Cart(models.Model):
+    
+    # fields
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
 class CartItem(models.Model):
+
     # filed 
+    quantity = models.PositiveSmallIntegerField()
 
     # relationships 
-    pass
-
+    cart = models.ForeignKey(to=Cart, on_delete=models.CASCADE)
+    product = models.ForeignKey(to=Product, on_delete=models.CASCADE)

@@ -5,8 +5,6 @@ from django.http import HttpResponse
 
 def hello(request):
     # return HttpResponse('Hello World')
-    x = 1
-    y = 1
     return render(request=request,
                   template_name='hello.html',
                   context={'name' : 'Rishabh', 'emotion':'bad'}
