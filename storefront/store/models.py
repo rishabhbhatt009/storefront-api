@@ -18,8 +18,9 @@ class Product(models.Model):
 
     # fields
     title = models.CharField(max_length=250)
+    slug = models.SlugField(default='-')
     description = models.TextField()
-    price = models.DecimalField(max_digits=6, decimal_places=2)
+    unit_price = models.DecimalField(max_digits=6, decimal_places=2)
     inventory = models.IntegerField()
     last_update = models.DateTimeField(auto_now=True)
 
@@ -46,6 +47,10 @@ class Customer(models.Model):
     birth_date = models.DateField(null=True)
     membership = models.CharField(max_length=3, choices=MEMBERSHIP_CHOICES, default=MEMBERSHIP_DEFAULT)
 
+    # # metadata
+    # class Meta : 
+    #     db_table = 'store_front'
+    #     indexes = [models.Index(fields=['last_name', 'first_name'])]
 
 class Order(models.Model):
     
