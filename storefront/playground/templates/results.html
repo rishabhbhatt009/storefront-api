@@ -1,0 +1,43 @@
+<html>
+    
+    <style>
+    .centered-box {
+      width: 1000px; /* Adjust the width as per your requirement */
+      /* height: 100px; Adjust the height as per your requirement */
+      margin: 0 auto; /* Centers the div horizontally */
+      /* border: 2px solid black; Adds a border to the div */
+    }
+    .box {
+        background-color: #ffe4a4e8;
+        margin-right: 10px;
+    }
+    .output{
+        color: salmon;
+        font-weight: bold;
+    }
+    </style>
+    
+    <body class="centered-box">
+
+        <h1>Hello World !!!</h1>
+
+        <h2>Welcome to my store</h2>
+        
+        <div style="display: flex;">
+                        
+            <div class="box">
+                Here is a list of {{count}} results :
+                <ul>
+                    {% for item in results %}
+                    <li class="output">{{item}}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+        </div>
+
+        <hr>
+
+        <h2>Thank You for visiting</h2>
+    </body>
+</html>
