@@ -51,6 +51,7 @@ def filter(request):
 
 def orders(request):
 
+    # orders with product name and price 
     orders = (OrderItem.objects
               .values('product__title', 'product__unit_price')
               .distinct()

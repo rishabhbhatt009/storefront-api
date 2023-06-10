@@ -15,6 +15,23 @@
         color: salmon;
         font-weight: bold;
     }
+
+    table {
+      background-color: #ffffff;
+      border-collapse: collapse;
+      border: 1px solid #cccccc;
+      border-radius: 5px;
+    }
+
+    th, td {
+      padding: 8px;
+      border-bottom: 1px solid #cccccc;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
     </style>
     
     <body class="centered-box">
@@ -26,12 +43,23 @@
         <div style="display: flex;">
                         
             <div class="box">
-                Here is a list of {{count}} results :
-                <ul>
-                    {% for item in results %}
-                    <li class="output">{{item}}</li>
+                Here is a list of {{count}} results :  
+                
+                <table>
+                    <tr>
+                      <th>Product Name</th>
+                      <th>Product Price</th>
+                      <th>Collection Name</th>
+                    </tr>
+                    {% for value in results %}
+                    <tr>
+                      <td>{{ value.product__title }}</td>
+                      <td>{{ value.product__unit_price }}</td>
+                      <td>{{ value.collection__title }}</td>
+                    </tr>
                     {% endfor %}
-                </ul>
+                </table>
+
             </div>
 
         </div>
