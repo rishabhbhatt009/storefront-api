@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.db.models import Q, F
 from django.http import HttpResponse
 from store.models import Product,Collection, OrderItem, Order
+from tags.models import TaggedItem
 
 import random
 # Create your views here.
@@ -90,4 +91,14 @@ def orders(request):
                       'count' : 0,
                       'results' : list(orders)
                       }
+                )
+
+def generic_relation(request):
+
+    product_id = 1
+    res = list(TaggedItem.objects.get_tags(Product,product_id))
+
+    return render(request=request,
+                template_name='hello.html',
+                context={'name' : 'Rishabh', 'emotion':'happy'}
                 )

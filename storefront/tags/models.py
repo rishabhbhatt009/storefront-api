@@ -4,6 +4,22 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 
 # Create your models here.
 
+# custom manager class
+class CustomManager_Tags(models.Manager):
+
+    def get_tags(self, object_type, object_id): 
+
+        content_type_id = ContentType.objects.get_for_model(object_type)
+        tags = (TaggedItem.objects
+                .select_related('tag')
+                .filter(
+                        content_type = content_type_id,
+                        object_id = object_id
+                    )
+                )
+        return tags 
+
+
 class Tag(models.Model):
     
     # fields 
@@ -12,6 +28,9 @@ class Tag(models.Model):
 
 class TaggedItem(models.Model):
 
+    # for custom manager 
+    objects = CustomManager_Tags()
+    
     # fields 
     tag = models.ForeignKey(to=Tag, on_delete=models.CASCADE)
 
