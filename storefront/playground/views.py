@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.db.models import Q, F
 from django.http import HttpResponse
-from store.models import Product,Collection, OrderItem
+from store.models import Product,Collection, OrderItem, Order
 
 import random
 # Create your views here.
@@ -51,17 +51,43 @@ def filter(request):
 
 def orders(request):
 
-    # orders with product name and price 
-    orders = (OrderItem.objects
-              .values('product__title', 'product__unit_price')
-              .distinct()
-              .order_by('product__title')
-              )
+    # orderitems with product name and price 
+    # orders = (OrderItem.objects
+    #           .values('product__title', 'product__unit_price')
+    #           .distinct()
+    #           .order_by('product__title')
+    #           )
 
+    # orders with product name, price and collection title
+    
+    # orderitems with product name, price and collection name
+    # ordered_products = (OrderItem.objects
+    #                     .values('product_id')
+    #                     .distinct()
+    #                     )
+    
+    # products = (Product.objects
+    #             .filter(id__in=ordered_products)
+    #             .values('title', 'unit_price', 'collection__title')
+    #             .order_by('-unit_price')
+    #             )    
+
+    # last 5 order
+    orders = (OrderItem.objects
+              .select_related('order', 'product')
+              .select_related('order__customer')
+              .values('order__id', 'order__placed_at',
+                      'quantity','unit_price',
+                      'product__title',
+                      'order__customer__email'
+                      )
+              .order_by('-order__placed_at')
+              )[:5]
+ 
     return render(request=request,
                   template_name='results.html', 
                   context={
-                      'count' : orders.count(),
+                      'count' : 0,
                       'results' : list(orders)
                       }
                 )
