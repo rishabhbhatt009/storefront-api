@@ -7,7 +7,7 @@ from .models import Product
 from .serializers import ProductSerializer
 
 # Create your views here.
-@api_view()
+@api_view(['GET', 'POST'])
 def product_list(request):
 
     if request.method == 'GET': 
@@ -20,8 +20,9 @@ def product_list(request):
 
         ### replacement for if(valid)
         serializer.is_valid(raise_exception=True)
-        serializer.validated_data
-        return Response('Gotha')
+        print(serializer.validated_data)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         # if serializer.is_valid():
         #     serializer.validated_data
@@ -30,7 +31,7 @@ def product_list(request):
         #     return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
 
 
-@api_view()
+@api_view(['GET', 'PUT', 'DELETE'])
 def product_details(request, id):
 
     # try : 
@@ -42,8 +43,18 @@ def product_details(request, id):
     #     return Response(status=status.HTTP_404_NOT_FOUND) 
 
     product = get_object_or_404(Product,pk=id)
-    serializer = ProductSerializer(product)
-    return Response(serializer.data)    
+    
+    if request.method == 'GET':
+        serializer = ProductSerializer(product)
+        return Response(serializer.data)    
+    
+    elif request.method == 'PUT':
+        serializer = ProductSerializer(product, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+                
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        
 
 @api_view()
 def collection_details(request, pk):
