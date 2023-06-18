@@ -3,8 +3,20 @@ from . import views
 
 # URLConf
 urlpatterns = [
-    path('products/', views.product_list),
-    path('products/<int:id>/', views.product_details),
+    
+    ##################################################################################
+    # Function based view urls links 
+    ##################################################################################
+    
+    # path('products/', views.product_list),
+    # path('products/<int:id>/', views.product_details),
     path('collections/', views.collection_list, name='collection-list'),
-    path('collections/<int:pk>/', views.collection_details, name='collection-details')
+    path('collections/<int:pk>/', views.collection_details, name='collection-details'),
+    
+    ##################################################################################
+    # Class based view urls links 
+    ##################################################################################
+    path('products/', views.ProductList.as_view()),
+    path('products/<int:id>/', views.ProductDetails.as_view()),
+    
 ]
