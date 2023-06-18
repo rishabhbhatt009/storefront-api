@@ -2,13 +2,31 @@ from decimal import Decimal
 from rest_framework import serializers
 from . models import Product, Collection
 
-class CollectionSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    title = serializers.CharField(max_length=255)
+class CollectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Collection
+        fields = ['id', 'title', 'products_count']
+
+    products_count = serializers.IntegerField(read_only = True)
+
+
+# class CollectionSerializer(serializers.Serializer):
+#     id = serializers.IntegerField()
+#     title = serializers.CharField(max_length=255)
+
+#     ### this results in multiple queries 
+#     ### -------------------------------------------------
+#     # product_count  = serializers.SerializerMethodField(method_name='get_product_count')
+    
+#     # def get_product_count(self, collection):
+#     #     return Product.objects.filter(collection=collection).count()
+
+#     product_count = serializers.IntegerField()
+
 
 
 ### Option - 1 : Defining each field individually 
-### -------------------------------------------------
+
 # class ProductSerializer(serializers.Serializer):
 #     id = serializers.IntegerField()
 #     title = serializers.CharField(max_length=255) 
