@@ -1,6 +1,9 @@
 from django.core.validators import MinValueValidator
 from django.db import models
 
+##########################################################################################
+# Models used from course - 1 
+##########################################################################################
 
 class Promotion(models.Model):
     description = models.CharField(max_length=255)
@@ -102,3 +105,18 @@ class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveSmallIntegerField()
+
+##########################################################################################
+# New Models 
+##########################################################################################
+
+# Product Review Model 
+
+class Review(models.Model):
+    # fields 
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    date = models.DateField(auto_now_add=True)
+
+# ----------------------------------------------------------------------------------------
