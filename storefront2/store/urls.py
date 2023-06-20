@@ -1,18 +1,48 @@
 from django.urls import path, include
-from rest_framework.routers import SimpleRouter, DefaultRouter
+# from rest_framework.routers import SimpleRouter, DefaultRouter
+from rest_framework_nested import routers
 from . import views
 
 # URLConf
 
 ##################################################################################
-# Routers
+# Nested Routers
 ##################################################################################
 
-router = DefaultRouter()
+# Step 1 : create parent/domain router and register parent resource
+router = routers.DefaultRouter()
 router.register('products', views.ProductViewSet)
 router.register('collections', views.CollectionViewSet)
 
-urlpatterns = router.urls
+# # Step 2 : create child routers and register view
+products_router = routers.NestedDefaultRouter(
+    parent_router=router, 
+    parent_prefix='products', 
+    lookup='product'
+    ) 
+
+products_router.register(
+    prefix='reviews', 
+    viewset=views.ReviewViewSet, 
+    basename='products-reviews'
+)
+
+# urlpatterns = router.urls + products_router.urls
+
+urlpatterns = [
+    path(r'', include(router.urls)),
+    path(r'', include(products_router.urls)),
+]
+
+##################################################################################
+# Routers
+##################################################################################
+
+# router = DefaultRouter()
+# router.register('products', views.ProductViewSet)
+# router.register('collections', views.CollectionViewSet)
+
+# urlpatterns = router.urls
 
 # If we have additional custom URLs
 # urlpatterns = [
