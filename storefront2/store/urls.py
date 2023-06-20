@@ -11,7 +11,7 @@ from . import views
 
 # Step 1 : create parent/domain router and register parent resource
 router = routers.DefaultRouter()
-router.register('products', views.ProductViewSet)
+router.register('products', views.ProductViewSet, basename='products')
 router.register('collections', views.CollectionViewSet)
 
 # # Step 2 : create child routers and register view
@@ -28,7 +28,6 @@ products_router.register(
 )
 
 # urlpatterns = router.urls + products_router.urls
-
 urlpatterns = [
     path(r'', include(router.urls)),
     path(r'', include(products_router.urls)),
