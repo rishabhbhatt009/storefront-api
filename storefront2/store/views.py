@@ -10,12 +10,13 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import status
+from rest_framework.filters import SearchFilter, OrderingFilter
 
-from django_filters.rest_framework import DjangoFilterBackend 
-from .filters import ProductFilterSet
+from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Product, Collection, OrderItem, Review
 from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer
+from .filters import ProductFilterSet
 
 ##############################################################################################
 ##############################################################################################
@@ -67,8 +68,10 @@ class ProductViewSet(ModelViewSet):
     # filterset_fields = ['collection_id', 'unit_price']
     
     ### custom generic filters 
-    filter_backends = [DjangoFilterBackend] 
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter] 
     filterset_class = ProductFilterSet
+    search_fields = ['title', 'description']
+    ordering_fields = ['unit_price', 'inventory']
     
     # ------------------------------------------------ 
     # Adding simple filtering from URL params
