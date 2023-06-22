@@ -12,11 +12,13 @@ from rest_framework.request import Request
 from rest_framework import status
 from rest_framework.filters import SearchFilter, OrderingFilter
 
+
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Product, Collection, OrderItem, Review
 from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer
 from .filters import ProductFilterSet
+from .pagination import DefaultPagination
 
 ##############################################################################################
 ##############################################################################################
@@ -58,6 +60,7 @@ class ProductViewSet(ModelViewSet):
     
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    pagination_class = DefaultPagination
     
     # ------------------------------------------------ 
     # Adding generic filtering 
