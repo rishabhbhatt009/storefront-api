@@ -13,6 +13,7 @@ from . import views
 router = routers.DefaultRouter()
 router.register('products', views.ProductViewSet, basename='products')
 router.register('collections', views.CollectionViewSet)
+router.register('carts', views.CartViewSet, basename='carts')
 
 # # Step 2 : create child routers and register view
 products_router = routers.NestedDefaultRouter(
@@ -27,10 +28,23 @@ products_router.register(
     basename='products-reviews'
 )
 
+cart_router = routers.NestedDefaultRouter(
+    parent_router=router,
+    parent_prefix='carts',
+    lookup='cart'
+)
+
+cart_router.register(
+    prefix='items',
+    viewset=views.CartItemViewSet,
+    basename='carts-items'
+)
+
 # urlpatterns = router.urls + products_router.urls
 urlpatterns = [
     path(r'', include(router.urls)),
     path(r'', include(products_router.urls)),
+    path(r'', include(cart_router.urls))
 ]
 
 ##################################################################################

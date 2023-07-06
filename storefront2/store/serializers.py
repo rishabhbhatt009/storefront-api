@@ -1,13 +1,13 @@
 from decimal import Decimal
 from rest_framework import serializers
-from . models import Product, Collection, Review
+from . models import Product, Collection, Review, Cart, CartItem
 
 ###############################################################################
 ###############################################################################
 # 
 # There are 2 ways to create a serializer class 
-# - Option 1 : 
-# - Option 2 : 
+# - Option 1 : Defining each field individually 
+# - Option 2 : Using model definition to generate serializer
 # 
 ###############################################################################
 ###############################################################################
@@ -16,6 +16,33 @@ from . models import Product, Collection, Review
 ###############################################################################
 ### Option 2 : Using model definition to generate serializer
 ###############################################################################
+
+# -----------------------------------------------------------------------------
+# Cart and CartItem Serializer
+# -----------------------------------------------------------------------------
+        
+class CartItemProductSerializer(serializers.ModelSerializer):
+    # title = serializers.CharField(read_only=True)
+    class Meta : 
+        model = Product
+        fields = ['id', 'title', 'unit_price', 'collection']
+        
+class CartItemSerializer(serializers.ModelSerializer):
+    
+    id  = serializers.IntegerField(read_only=True)
+    product = CartItemProductSerializer
+    
+    class Meta : 
+        model = CartItem
+        fields = ['id', 'product', 'quantity']
+
+class CartSerializer(serializers.ModelSerializer):
+    
+    id = serializers.UUIDField(read_only=True)
+    items = CartItemProductSerializer
+    class Meta : 
+        model = Cart
+        fields = ['id', 'created_at'] # 'items'
 
 # -----------------------------------------------------------------------------
 # Review Serializer

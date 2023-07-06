@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import status
@@ -15,8 +15,8 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-from .models import Product, Collection, OrderItem, Review
-from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer
+from .models import Product, Collection, OrderItem, Review, Cart, CartItem
+from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemProductSerializer, CartItemSerializer
 from .filters import ProductFilterSet
 from .pagination import DefaultPagination
 
@@ -35,6 +35,28 @@ from .pagination import DefaultPagination
 ##############################################################################################
 # Generic ViewsSet
 ##############################################################################################
+
+# ------------------------------------------------------------------------------------------
+# Using GENERIC VIEWS-SET with modification for CART and CART-ITEMS
+# ------------------------------------------------------------------------------------------
+
+# Cart ViewSet 
+class CartViewSet(CreateModelMixin, GenericViewSet):
+
+    serializer_class = CartSerializer
+    
+    def get_queryset(self):
+        queryset = Cart.objects.all()
+        return queryset
+    
+# Cart-Item ViewSet
+class CartItemViewSet(ModelViewSet):
+
+    serializer_class = CartItem
+    
+    def get_queryset(self):
+        queryset = CartItem.objects.all()
+        return queryset
 
 # ------------------------------------------------------------------------------------------
 # Using GENERIC VIEWS-SET for reviews
