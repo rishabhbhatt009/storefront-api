@@ -22,27 +22,37 @@ from . models import Product, Collection, Review, Cart, CartItem
 # -----------------------------------------------------------------------------
         
 class CartItemProductSerializer(serializers.ModelSerializer):
-    # title = serializers.CharField(read_only=True)
-    class Meta : 
+    
+     class Meta : 
         model = Product
-        fields = ['id', 'title', 'unit_price', 'collection']
+        fields = ['id', 'title', 'unit_price']
         
 class CartItemSerializer(serializers.ModelSerializer):
     
     id  = serializers.IntegerField(read_only=True)
-    product = CartItemProductSerializer
+    product = CartItemProductSerializer()
+    total_price = serializers.SerializerMethodField()
+    
+    def get_total_price(self, cart_item:CartItem):
+        return cart_item.product.unit_price * cart_item.quantity
     
     class Meta : 
         model = CartItem
-        fields = ['id', 'product', 'quantity']
+        fields = ['id', 'product', 'quantity', 'total_price']
 
 class CartSerializer(serializers.ModelSerializer):
     
     id = serializers.UUIDField(read_only=True)
-    items = CartItemProductSerializer
+    items = CartItemSerializer(many=True, read_only=True)
+    total_price = serializers.SerializerMethodField()
+    
+    def get_total_price(self, cart:CartItem):
+        price_of_each_item = [item.quantity * item.product.unit_price for item in cart.items.all()]
+        return sum(price_of_each_item)
+    
     class Meta : 
         model = Cart
-        fields = ['id', 'created_at'] # 'items'
+        fields = ['id', 'created_at', 'items', 'total_price']
 
 # -----------------------------------------------------------------------------
 # Review Serializer

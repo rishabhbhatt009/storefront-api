@@ -40,12 +40,12 @@ cart_router.register(
     basename='carts-items'
 )
 
-# urlpatterns = router.urls + products_router.urls
-urlpatterns = [
-    path(r'', include(router.urls)),
-    path(r'', include(products_router.urls)),
-    path(r'', include(cart_router.urls))
-]
+urlpatterns = router.urls + products_router.urls + cart_router.urls
+# urlpatterns = [
+#     path(r'', include(router.urls)),
+#     path(r'', include(products_router.urls)),
+#     path(r'', include(cart_router.urls))
+# ]
 
 ##################################################################################
 # Routers

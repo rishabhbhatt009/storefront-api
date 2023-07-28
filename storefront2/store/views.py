@@ -4,7 +4,7 @@ from django.shortcuts import render, get_object_or_404
 
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
-from rest_framework.mixins import CreateModelMixin, ListModelMixin
+from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin, DestroyModelMixin
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.response import Response
@@ -41,21 +41,36 @@ from .pagination import DefaultPagination
 # ------------------------------------------------------------------------------------------
 
 # Cart ViewSet 
-class CartViewSet(CreateModelMixin, GenericViewSet):
+class CartViewSet(CreateModelMixin, 
+                  ListModelMixin,
+                  RetrieveModelMixin,
+                  DestroyModelMixin, 
+                  GenericViewSet):
 
     serializer_class = CartSerializer
     
     def get_queryset(self):
-        queryset = Cart.objects.all()
+        queryset = Cart.objects.prefetch_related('items__product').all()
         return queryset
     
 # Cart-Item ViewSet
 class CartItemViewSet(ModelViewSet):
 
-    serializer_class = CartItem
+    serializer_class = CartItemSerializer
     
     def get_queryset(self):
-        queryset = CartItem.objects.all()
+        queryset = (CartItem.objects
+                    .filter(cart_id=self.kwargs['cart_pk'])
+                    
+                    # ------------------------------------------------------------------------
+                    # Note : this is a good place to notice the difference b/w 
+                    # 1. prefetch related : generates a single query where "item IN (...)" 
+                    # 2. select related : generates a query with an inner join for more info.
+                    # ------------------------------------------------------------------------
+                    # .prefetch_related('product')
+                    .select_related('product')
+                    )
+        
         return queryset
 
 # ------------------------------------------------------------------------------------------
