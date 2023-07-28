@@ -21,12 +21,61 @@ from . models import Product, Collection, Review, Cart, CartItem
 # Cart and CartItem Serializer
 # -----------------------------------------------------------------------------
         
+# serializer to display product for cart item
 class CartItemProductSerializer(serializers.ModelSerializer):
-    
      class Meta : 
         model = Product
         fields = ['id', 'title', 'unit_price']
+
+# serializer for PUT request
+class UpdateCartItemSerializer(serializers.ModelSerializer):
+    class Meta : 
+        model = CartItem
+        fields = ['quantity']
+
+# serializer for POST request         
+class AddCartItemSerializer(serializers.ModelSerializer):
+    product_id = serializers.IntegerField()
+    
+    # validating inputs 
+    def validate_product_id(self,value):
+        if not Product.objects.filter(pk=value).exists():
+            raise serializers.ValidationError('Product does not exist')
+        return value 
+    
+    # you can also set validators in the field definition inside model class 
+    # here you get a better error message 
+    # def validate_quantity(self,value):
+    #     if value <= 0 :
+    #         raise serializers.ValidationError('Quantity of product should be at least 1')
+    #     return value
+    
+    # custom saving operation 
+    def save(self, **kwargs):
+        cart_id = self.context['cart_id']
+        product_id = self.validated_data['product_id'] 
+        quantity = self.validated_data['quantity']
         
+        try:
+            cart_item = CartItem.objects.get(cart_id=cart_id, product_id=product_id)
+            # update existing item 
+            print('updating item')
+            cart_item.quantity += quantity
+            cart_item.save()
+            
+        except CartItem.DoesNotExist:
+            print('new item')
+            # create new item 
+            cart_item = CartItem.objects.create(cart_id=cart_id, **self.validated_data)
+        
+        self.instance = cart_item
+        return self.instance
+        
+    class Meta : 
+        model = CartItem
+        fields = ['id', 'product_id', 'quantity']
+    
+# serializer for GET request 
 class CartItemSerializer(serializers.ModelSerializer):
     
     id  = serializers.IntegerField(read_only=True)

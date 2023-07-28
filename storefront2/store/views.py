@@ -16,7 +16,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Product, Collection, OrderItem, Review, Cart, CartItem
-from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemProductSerializer, CartItemSerializer
+from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemProductSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer
 from .filters import ProductFilterSet
 from .pagination import DefaultPagination
 
@@ -55,13 +55,25 @@ class CartViewSet(CreateModelMixin,
     
 # Cart-Item ViewSet
 class CartItemViewSet(ModelViewSet):
-
-    serializer_class = CartItemSerializer
+    http_method_names = ['get', 'post', 'patch', 'delete']
+    
+    # option 1  : hard coded serializer 
+    # serializer_class = CartItemSerializer
+    
+    # option 2 : dynamically assigning the serializer 
+    def get_serializer_class(self):
+        if self.request.method == 'POST': 
+            return AddCartItemSerializer
+        elif self.request.method == 'PATCH':
+            return UpdateCartItemSerializer
+        return CartItemSerializer
+    
+    def get_serializer_context(self):
+        return {'cart_id':self.kwargs['cart_pk']}
     
     def get_queryset(self):
         queryset = (CartItem.objects
                     .filter(cart_id=self.kwargs['cart_pk'])
-                    
                     # ------------------------------------------------------------------------
                     # Note : this is a good place to notice the difference b/w 
                     # 1. prefetch related : generates a single query where "item IN (...)" 
@@ -70,11 +82,10 @@ class CartItemViewSet(ModelViewSet):
                     # .prefetch_related('product')
                     .select_related('product')
                     )
-        
         return queryset
 
 # ------------------------------------------------------------------------------------------
-# Using GENERIC VIEWS-SET for reviews
+# Using GENERIC VIEWS-SET for reviews 
 # ------------------------------------------------------------------------------------------
 
 class ReviewViewSet(ModelViewSet):
