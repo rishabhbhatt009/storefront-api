@@ -18,22 +18,22 @@ from . models import Product, Collection, Review, Cart, CartItem
 ###############################################################################
 
 # -----------------------------------------------------------------------------
-# Cart and CartItem Serializer
+# Cart and CartItem Serializers
 # -----------------------------------------------------------------------------
         
-# serializer to display product for cart item
+# cart item serializer to display product for cart item
 class CartItemProductSerializer(serializers.ModelSerializer):
      class Meta : 
         model = Product
         fields = ['id', 'title', 'unit_price']
 
-# serializer for PUT request
+# cart item serializer for PUT request
 class UpdateCartItemSerializer(serializers.ModelSerializer):
     class Meta : 
         model = CartItem
         fields = ['quantity']
 
-# serializer for POST request         
+# cart item serializer for POST request         
 class AddCartItemSerializer(serializers.ModelSerializer):
     product_id = serializers.IntegerField()
     
@@ -75,7 +75,7 @@ class AddCartItemSerializer(serializers.ModelSerializer):
         model = CartItem
         fields = ['id', 'product_id', 'quantity']
     
-# serializer for GET request 
+# cart item serializer for GET request 
 class CartItemSerializer(serializers.ModelSerializer):
     
     id  = serializers.IntegerField(read_only=True)
@@ -89,6 +89,7 @@ class CartItemSerializer(serializers.ModelSerializer):
         model = CartItem
         fields = ['id', 'product', 'quantity', 'total_price']
 
+# cart serializer 
 class CartSerializer(serializers.ModelSerializer):
     
     id = serializers.UUIDField(read_only=True)
