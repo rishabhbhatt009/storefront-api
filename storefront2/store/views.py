@@ -17,7 +17,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, D
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Product, Collection, Order, OrderItem, Review, Cart, CartItem, Customer
-from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemProductSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer, CustomerSerializer, OrderSerializer, CreateOrderSerializer
+from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemProductSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer, CustomerSerializer, OrderSerializer, CreateOrderSerializer, UpdateOrderSerializer
 from .filters import ProductFilterSet
 from .pagination import DefaultPagination
 from .permissions import IsAdminOrReadOnly, ViewCustomerHistoryPermission
@@ -44,7 +44,9 @@ from .permissions import IsAdminOrReadOnly, ViewCustomerHistoryPermission
 
 # Order View
 class OrderViewSet(ModelViewSet):
-        
+    
+    http_method_names = ['get', 'patch', 'delete', 'head', 'options']
+    
     # OVERWRITE create : return order on creation
     def create(self, request, *args, **kwargs):
         # create order using CreateOrderSerializer 
@@ -76,6 +78,9 @@ class OrderViewSet(ModelViewSet):
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return CreateOrderSerializer
+        elif self.request.method == 'PATCH':
+            print('method is patch')
+            return UpdateOrderSerializer
         return OrderSerializer
     
     
@@ -86,10 +91,8 @@ class OrderViewSet(ModelViewSet):
 
     # OVERWRITE get_permissions : 
     # permission_classes = [IsAuthenticated]
-    def get_permissions(self):
-        http_method_names = ['get', 'patch', 'delete', 'head', 'options']
-        
-        if self.request.method in ['PUT','PATCH', 'DELETE']:
+    def get_permissions(self):     
+        if self.request.method in ['PATCH', 'DELETE']:
             return [IsAdminUser()]
         return [IsAuthenticated()]
             
