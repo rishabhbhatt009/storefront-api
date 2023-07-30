@@ -16,8 +16,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, D
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-from .models import Product, Collection, OrderItem, Review, Cart, CartItem, Customer
-from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemProductSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer, CustomerSerializer
+from .models import Product, Collection, Order, OrderItem, Review, Cart, CartItem, Customer
+from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemProductSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer, CustomerSerializer, OrderSerializer, CreateOrderSerializer
 from .filters import ProductFilterSet
 from .pagination import DefaultPagination
 from .permissions import IsAdminOrReadOnly, ViewCustomerHistoryPermission
@@ -38,11 +38,39 @@ from .permissions import IsAdminOrReadOnly, ViewCustomerHistoryPermission
 # Generic ViewsSet
 ##############################################################################################
 
+# ------------------------------------------------------------------------------------------
+# Using GENERIC VIEWS-SET for Order and OrderItem 
+# ------------------------------------------------------------------------------------------
+
+# Order View
+class OrderViewSet(ModelViewSet):
+    
+    # we want a different queryset based on permissions
+    # queryset = Order.objects.all()
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff : 
+            return Order.objects.all()
+        customer, created = Customer.objects.get_or_create(user_id=user.id)
+        return Order.objects.filter(customer_id=customer.id)
+    
+    # we want a different queryset based on request method
+    # serializer_class = OrderSerializer
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return CreateOrderSerializer
+        return OrderSerializer
+        
+    def get_serializer_context(self):
+        return {'user_id': self.request.user.id}
+
+    permission_classes = [IsAuthenticated]
 
 # ------------------------------------------------------------------------------------------
 # Using GENERIC VIEWS-SET for User Profile 
 # ------------------------------------------------------------------------------------------
 
+# Customer View
 class CustomerViewSet(ModelViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
@@ -80,8 +108,6 @@ class CustomerViewSet(ModelViewSet):
     def history(self, request, pk):
         return Response('works')
         
-              
-
 # ------------------------------------------------------------------------------------------
 # Using GENERIC VIEWS-SET with modification for CART and CART-ITEMS
 # ------------------------------------------------------------------------------------------

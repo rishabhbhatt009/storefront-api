@@ -1,8 +1,9 @@
+from decimal import Decimal
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from decimal import Decimal
+from django.db import transaction
 from rest_framework import serializers
-from .models import Product, Collection, Review, Cart, CartItem, Customer
+from .models import Product, Collection, Review, Cart, CartItem, Customer, Order, OrderItem
 
 
 ###############################################################################
@@ -20,6 +21,70 @@ from .models import Product, Collection, Review, Cart, CartItem, Customer
 ### Option 2 : Using model definition to generate serializer
 ###############################################################################
 
+# -----------------------------------------------------------------------------
+# Order and OrderItem Serializers
+# -----------------------------------------------------------------------------
+
+class OrderItemProductSerializer(serializers.ModelSerializer):
+     class Meta : 
+        model = Product
+        fields = ['id', 'title', 'unit_price']
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    product = OrderItemProductSerializer()
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'product', 'unit_price', 'quantity']
+
+class OrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True)
+    class Meta:
+        model = Order
+        fields = ['id', 'customer', 'placed_at', 'payment_status', 'items']
+        
+class CreateOrderSerializer(serializers.Serializer):
+    cart_id = serializers.UUIDField()
+    
+    
+    
+    def save(self, **kwargs):
+        # print('Cart ID :',self.validated_data['cart_id'])
+        # print('User ID :',self.context['user_id'])
+        
+        # --------------------------------------------------------
+        # we want all steps to be atomic 
+        # (i.e) all operations should exec or none 
+        # --------------------------------------------------------
+        with transaction.atomic(): 
+            # STEP 1 : get cart id and user id
+            user_id = self.context['user_id']
+            cart_id = self.validated_data['cart_id']
+            
+            # STEP 2 : create a new order
+            customer, created = Customer.objects.get_or_create(user_id=user_id)
+            order = Order.objects.create(customer=customer)
+            
+            # STEP 3 : get cart items 
+            cart_items = (CartItem.objects
+                        .select_related('product')
+                        .filter(cart_id=cart_id)
+                        )
+            
+            # STEP 4 : create order items from cart items
+            order_items = []
+            for item in cart_items:
+                order_item = OrderItem(order=order, 
+                                    product=item.product,
+                                    quantity=item.quantity,
+                                    unit_price=item.product.unit_price    
+                                    )
+                order_items.append(order_item)
+            OrderItem.objects.bulk_create(order_items)
+            
+            # STEP 5 : delete cart 
+            Cart.objects.filter(pk=cart_id).delete()
+            
+        
 # -----------------------------------------------------------------------------
 # Customer Profile Serializers
 # -----------------------------------------------------------------------------
