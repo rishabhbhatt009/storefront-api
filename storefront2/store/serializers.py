@@ -1,6 +1,9 @@
+from django.conf import settings
+from django.contrib.auth import get_user_model
 from decimal import Decimal
 from rest_framework import serializers
-from . models import Product, Collection, Review, Cart, CartItem
+from .models import Product, Collection, Review, Cart, CartItem, Customer
+
 
 ###############################################################################
 ###############################################################################
@@ -16,6 +19,23 @@ from . models import Product, Collection, Review, Cart, CartItem
 ###############################################################################
 ### Option 2 : Using model definition to generate serializer
 ###############################################################################
+
+# -----------------------------------------------------------------------------
+# Customer Profile Serializers
+# -----------------------------------------------------------------------------
+
+### If we want additional user information
+# class UserInfoSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = get_user_model()
+#         fields = ['id', 'first_name', 'last_name', 'email']
+
+class CustomerSerializer(serializers.ModelSerializer):
+    # user = UserInfoSerializer()
+    user_id = serializers.IntegerField(read_only=True) # for testing 
+    class Meta : 
+        model = Customer
+        fields = ['id', 'user_id', 'phone', 'birth_date', 'membership'] # 'user',
 
 # -----------------------------------------------------------------------------
 # Cart and CartItem Serializers

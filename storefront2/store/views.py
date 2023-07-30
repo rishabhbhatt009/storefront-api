@@ -1,24 +1,26 @@
-from django.db.models import Count
 from django.http import HttpResponse
+from django.db.models import Count
 from django.shortcuts import render, get_object_or_404
 
+from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
-from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin, DestroyModelMixin
+from rest_framework.mixins import CreateModelMixin, ListModelMixin, UpdateModelMixin, RetrieveModelMixin, DestroyModelMixin
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.response import Response
 from rest_framework.request import Request
-from rest_framework import status
 from rest_framework.filters import SearchFilter, OrderingFilter
-
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, DjangoModelPermissions
 
 from django_filters.rest_framework import DjangoFilterBackend
 
-from .models import Product, Collection, OrderItem, Review, Cart, CartItem
-from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemProductSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer
+from .models import Product, Collection, OrderItem, Review, Cart, CartItem, Customer
+from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemProductSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer, CustomerSerializer
 from .filters import ProductFilterSet
 from .pagination import DefaultPagination
+from .permissions import IsAdminOrReadOnly, ViewCustomerHistoryPermission
 
 ##############################################################################################
 ##############################################################################################
@@ -36,13 +38,57 @@ from .pagination import DefaultPagination
 # Generic ViewsSet
 ##############################################################################################
 
+
+# ------------------------------------------------------------------------------------------
+# Using GENERIC VIEWS-SET for User Profile 
+# ------------------------------------------------------------------------------------------
+
+class CustomerViewSet(ModelViewSet):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+    
+    # defining permission 
+    # option 1 : generic (we use class)
+    permission_classes = [IsAdminUser]
+    
+    # option 2 : based on methods (we use objects of classes)
+    # def get_permissions(self):
+    #     if self.request.method == 'GET':
+    #         return [AllowAny()]
+    #     return [IsAuthenticated()]
+    
+    
+    # defining actions 
+    
+    # we are also overwriting permission_classes
+    @action(detail=False, methods=['GET', 'PUT'], permission_classes=[IsAuthenticated])
+    def me(self, request):
+        
+        customer,created = Customer.objects.get_or_create(user_id=request.user.id)
+        
+        if request.method == 'GET':
+            serializer = CustomerSerializer(customer)
+            return Response(serializer.data)
+        
+        elif request.method == 'PUT':
+            serializer = CustomerSerializer(customer, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+    
+    @action(detail=True, permission_classes=[ViewCustomerHistoryPermission])
+    def history(self, request, pk):
+        return Response('works')
+        
+              
+
 # ------------------------------------------------------------------------------------------
 # Using GENERIC VIEWS-SET with modification for CART and CART-ITEMS
 # ------------------------------------------------------------------------------------------
 
 # Cart ViewSet 
 class CartViewSet(CreateModelMixin, 
-                  ListModelMixin,
+                  # ListModelMixin,
                   RetrieveModelMixin,
                   DestroyModelMixin, 
                   GenericViewSet):
@@ -108,6 +154,11 @@ class ProductViewSet(ModelViewSet):
     
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    
+    ### Adding Permissions 
+    permission_classes = [IsAdminOrReadOnly]
+    
+    ### Adding Pagination 
     pagination_class = DefaultPagination
     
     # ------------------------------------------------ 
@@ -168,11 +219,15 @@ class CollectionViewSet(ModelViewSet):
                 .all())
     serializer_class = CollectionSerializer
     
+    # adding permissions 
+    permission_classes = [IsAdminOrReadOnly]
+    
     def destroy(self, request, *args, **kwargs):
         product_count = Product.objects.select_related('collection').filter(collection_id = kwargs['pk']).count()
         if product_count > 0:
             return Response({'error': f'Collection cannot be deleted because it includes one or more products ({product_count}).'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
         return super().destroy(request, *args, **kwargs)
+
     
 ##############################################################################################
 # GENERIC VIEWS
