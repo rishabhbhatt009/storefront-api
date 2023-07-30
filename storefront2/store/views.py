@@ -44,8 +44,24 @@ from .permissions import IsAdminOrReadOnly, ViewCustomerHistoryPermission
 
 # Order View
 class OrderViewSet(ModelViewSet):
+        
+    # OVERWRITE create : return order on creation
+    def create(self, request, *args, **kwargs):
+        # create order using CreateOrderSerializer 
+        serializer = CreateOrderSerializer(
+            data=request.data,
+            context={'user_id': self.request.user.id}
+            )
+        serializer.is_valid(raise_exception=True)
+        order = serializer.save()
+        
+        # send created order to OrderSerializer for display 
+        serializer = OrderSerializer(order)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     
-    # we want a different queryset based on permissions
+    # OVERWRITE get_queryset : different queryset based on permissions
     # queryset = Order.objects.all()
     def get_queryset(self):
         user = self.request.user
@@ -53,16 +69,20 @@ class OrderViewSet(ModelViewSet):
             return Order.objects.all()
         customer, created = Customer.objects.get_or_create(user_id=user.id)
         return Order.objects.filter(customer_id=customer.id)
+ 
     
-    # we want a different queryset based on request method
+    # OVERWRITE get_serializer_class : different queryset based on request method
     # serializer_class = OrderSerializer
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return CreateOrderSerializer
         return OrderSerializer
-        
-    def get_serializer_context(self):
-        return {'user_id': self.request.user.id}
+    
+    
+    # OVERWRITE get_serializer_context : send additional context to serializer
+    # Note : no longer required as we are overwriting create 
+    # def get_serializer_context(self):
+    #     return {'user_id': self.request.user.id}
 
     permission_classes = [IsAuthenticated]
 

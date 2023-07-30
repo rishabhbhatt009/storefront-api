@@ -45,7 +45,18 @@ class OrderSerializer(serializers.ModelSerializer):
 class CreateOrderSerializer(serializers.Serializer):
     cart_id = serializers.UUIDField()
     
-    
+    # OVERWRITE validate : validate input
+    def validate_cart_id(self, cart_id):
+        
+        # check if cart exists
+        if not Cart.objects.filter(pk=cart_id).exists():
+            raise serializers.ValidationError("Cart does not exist.")
+        
+        # check if cart is empty 
+        if CartItem.objects.filter(cart_id=cart_id).count() == 0 :
+            raise serializers.ValidationError("Cart is empty.")
+        
+        return cart_id
     
     def save(self, **kwargs):
         # print('Cart ID :',self.validated_data['cart_id'])
@@ -83,7 +94,8 @@ class CreateOrderSerializer(serializers.Serializer):
             
             # STEP 5 : delete cart 
             Cart.objects.filter(pk=cart_id).delete()
-            
+        
+        return order 
         
 # -----------------------------------------------------------------------------
 # Customer Profile Serializers
