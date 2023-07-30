@@ -84,7 +84,15 @@ class OrderViewSet(ModelViewSet):
     # def get_serializer_context(self):
     #     return {'user_id': self.request.user.id}
 
-    permission_classes = [IsAuthenticated]
+    # OVERWRITE get_permissions : 
+    # permission_classes = [IsAuthenticated]
+    def get_permissions(self):
+        http_method_names = ['get', 'patch', 'delete', 'head', 'options']
+        
+        if self.request.method in ['PUT','PATCH', 'DELETE']:
+            return [IsAdminUser()]
+        return [IsAuthenticated()]
+            
 
 # ------------------------------------------------------------------------------------------
 # Using GENERIC VIEWS-SET for User Profile 
