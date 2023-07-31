@@ -38,11 +38,16 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    # installed apps
     'django_filters',
     'rest_framework',
     'djoser',
-    'playground',
     'debug_toolbar',
+    'corsheaders',
+    
+    # custom apps 
+    'playground',
     'store',
     'tags',
     'likes',
@@ -50,6 +55,11 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # -----------------------------------------------------------
+    # added middle ware for CORS (Cross Origin Resource Sharing)
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    # -----------------------------------------------------------
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -64,6 +74,12 @@ INTERNAL_IPS = [
     # ...
     '127.0.0.1',
     # ...
+]
+
+# adding allowed origins 
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:8001',
+    'http://127.0.0.1:8001',
 ]
 
 ROOT_URLCONF = 'storefront.urls'
@@ -139,10 +155,14 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+#########################################################################################
 # ADD : media location
+#########################################################################################
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+#########################################################################################
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -169,3 +189,20 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('JWT',),
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1)
 }
+
+
+#########################################################################################
+# ADD : email backend
+#########################################################################################
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'localhost'
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_PORT = 2525
+DEFAULT_FROM_EMAIL = 'admin@storefront.com'
+
+ADMINS = [
+    ('admin', 'admin@storefront.com')
+]
+#########################################################################################
