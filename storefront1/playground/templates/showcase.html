@@ -1,0 +1,61 @@
+<html>
+
+    <style>
+    .centered-box {
+      width: 1000px; /* Adjust the width as per your requirement */
+      /* height: 100px; Adjust the height as per your requirement */
+      margin: 0 auto; /* Centers the div horizontally */
+      /* border: 2px solid black; Adds a border to the div */
+    }
+    .box {
+        background-color: #ffe4a4e8;
+        margin-right: 10px;
+    }
+    .output{
+        color: salmon;
+        font-weight: bold;
+    }
+    </style>
+    
+    <body class="centered-box">
+
+        <h1>Hello World !!!</h1>
+
+        <h2>My name is {{name}}</h2>
+
+        <h2>Welcome to my store</h2>
+        
+        <div style="display: flex;">
+            
+            <div class="box">
+                We have a total of <span class="output"> {{count}} </span> products in our store. 
+                <br>
+                Here is a sample from my shop : <br>
+                <span class="output"> {{sample.title}} </span>
+            </div>
+
+            <div class="box">
+                Here is a list of products :
+                <ul>
+                    {% for product in products %}
+                    <li class="output">{{product.title}}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <div class="box">
+                Here is a list of collections :
+                <ul>
+                    {% for collection in collections %}
+                    <li class="output">{{collection.title}}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+        </div>
+
+        <hr>
+
+        <h2>Thank You for visiting</h2>
+    </body>
+</html>
