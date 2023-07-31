@@ -8,3 +8,5 @@ djoser
 djangorestframework-simplejwt
 django-cors-headers
 Pillow
+redis
+celery
