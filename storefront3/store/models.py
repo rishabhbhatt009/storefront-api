@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.conf import settings
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, FileExtensionValidator
+from .validators import validate_file_size
 from django.db import models
 from uuid import uuid4
 
@@ -42,6 +43,7 @@ class Product(models.Model):
     class Meta:
         ordering = ['title']
 
+
 #########################################################################################
 # Adding model for product images :
 # - to prevent the database for becoming slow we store the images on file
@@ -50,11 +52,17 @@ class Product(models.Model):
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='store/images')
+    image = models.ImageField(
+        upload_to='store/images',
+        validators=[validate_file_size]
+        )
     
-
-
-
+    # validator for files 
+    # file = models.FileField(
+    #     upload_to='store/files',
+    #     validators=[FileExtensionValidator(allowed_extensions=['pdf'])]
+    # )
+    
 #########################################################################################
 
 class Customer(models.Model):

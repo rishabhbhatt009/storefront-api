@@ -11,12 +11,13 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework import status
 from .filters import ProductFilter
-from .models import Cart, CartItem, Collection, Customer, Order, OrderItem, Product, Review
-from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CollectionSerializer, CreateOrderSerializer, CustomerSerializer, OrderSerializer, ProductSerializer, ReviewSerializer, UpdateCartItemSerializer, UpdateOrderSerializer
+from .models import Cart, CartItem, Collection, Customer, Order, OrderItem, Product, Review, ProductImage
+from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CollectionSerializer, CreateOrderSerializer, CustomerSerializer, OrderSerializer, ProductSerializer, ReviewSerializer, UpdateCartItemSerializer, UpdateOrderSerializer, ProductImageSerializer
 
 
 class ProductViewSet(ModelViewSet):
-    queryset = Product.objects.all()
+    # added prefetch to remove redundant SQL queries 
+    queryset = Product.objects.prefetch_related('images').all()
     serializer_class = ProductSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ProductFilter
@@ -141,3 +142,24 @@ class OrderViewSet(ModelViewSet):
         customer_id = Customer.objects.only(
             'id').get(user_id=user.id)
         return Order.objects.filter(customer_id=customer_id)
+
+
+#########################################################################################
+# Creating view for UPLOAD API
+#########################################################################################
+
+class ProductImageViewSet(ModelViewSet):
+    serializer_class = ProductImageSerializer
+    
+    # OVERWRITE : get_queryset
+    def get_queryset(self):
+        # get id from url : product/product_pk/images/pk
+        product_id = self.kwargs['product_pk']
+        return ProductImage.objects.filter(product_id=product_id)
+    
+    # OVERWRITE : get_serializer_context
+    # sends context to the serializer 
+    def get_serializer_context(self):
+        return {'product_id' : self.kwargs['product_pk']}   
+    
+#########################################################################################
