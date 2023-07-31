@@ -1,3 +1,16 @@
 Django- Resources/*
+# Ignore node_modules directory
+node_modules/
+
+# Ignore npm package lock file
+package-lock.json
+
+# Ignore built files
+dist/
+build/
+out/
+
+.cache
+.vscode/
 
 __pycache__
