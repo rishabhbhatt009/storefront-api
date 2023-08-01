@@ -1,5 +1,7 @@
-from rest_framework import status
 import pytest
+from store.models import Collection
+from rest_framework import status
+from model_bakery import baker 
 
 #################################################################################
 # PYTEST
@@ -88,3 +90,29 @@ class TestCreateCollection:
         
         assert response.status_code == status.HTTP_201_CREATED
         assert response.data['id'] > 0
+
+
+#-------------------------------------------------------------------------------------
+# - Pytest creates a test database (test_storefront3) at the beginning 
+# - drops it when all test are finished  
+# - original data base it not impacted by testing data we create
+#-------------------------------------------------------------------------------------
+
+
+@pytest.mark.django_db        
+class TestRetrieveCollection:
+    
+    def test_if_collection_exists_return_200(self, api_client):
+        # Arrange 
+        # Collection.objects.create(title='Test')
+        # fills values based on type
+        collection = baker.make(Collection)
+        response = api_client.get(f'/store/collections/{collection.id}/')
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == {
+            'id' : collection.id,
+            'title' : collection.title,
+            'products_count' : 0
+        }
+        
