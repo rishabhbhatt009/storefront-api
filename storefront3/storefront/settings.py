@@ -210,8 +210,9 @@ ADMINS = [
 
 #########################################################################################
 # ADD : Message Broker (celery) settings
-# START WORKER  : celery -A storefront worker --loglevel=info
-# START BEAT    : celery -A storefront beat
+# START WORKER                  : celery -A storefront worker --loglevel=info
+# START BEAT                    : celery -A storefront beat
+# START CELERY WITH MONITORING  : celery -A storefront flower
 #########################################################################################
 
 # configuring the message broker (queue)
@@ -223,7 +224,7 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'playground.tasks.notify_customers',
         # 'schedule': crontab(day_of_week=1, hour=7, minute=30), # every monday on 7:30
         # 'schedule': crontab(minute='*/30'), # every 15 minutes
-        'schedule': 15, # seconds
+        'schedule': 5, # seconds
         'args': ['Hello World'],
     }
 }

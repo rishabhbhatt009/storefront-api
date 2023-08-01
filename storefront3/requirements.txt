@@ -10,3 +10,4 @@ django-cors-headers
 Pillow
 redis
 celery
+flower
