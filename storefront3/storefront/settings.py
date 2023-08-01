@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os 
 from pathlib import Path
 from datetime import timedelta
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -209,8 +210,23 @@ ADMINS = [
 
 #########################################################################################
 # ADD : Message Broker (celery) settings
+# START WORKER  : celery -A storefront worker --loglevel=info
+# START BEAT    : celery -A storefront beat
 #########################################################################################
 
+# configuring the message broker (queue)
 CELERY_BROKER_URL = 'redis://localhost:6379/1'
+
+# configuring celery beat scheduler
+CELERY_BEAT_SCHEDULE = {
+    'notify_customers':{
+        'task': 'playground.tasks.notify_customers',
+        # 'schedule': crontab(day_of_week=1, hour=7, minute=30), # every monday on 7:30
+        # 'schedule': crontab(minute='*/30'), # every 15 minutes
+        'schedule': 15, # seconds
+        'args': ['Hello World'],
+    }
+}
+
 
 #########################################################################################
