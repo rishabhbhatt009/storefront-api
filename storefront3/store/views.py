@@ -19,8 +19,15 @@ class ProductViewSet(ModelViewSet):
     # added prefetch to remove redundant SQL queries 
     queryset = Product.objects.prefetch_related('images').all()
     serializer_class = ProductSerializer
+    # -------------------------------------------------------------------------
+    # - filtering based on collection_id is handled by the DjangoFilterBackend 
+    #   which is one of the filter_backends specified in the viewset.
+    # - DjangoFilterBackend is responsible for applying the filters specified 
+    #   in the filterset_class based on the query parameters in the URL
+    # -------------------------------------------------------------------------
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ProductFilter
+    
     pagination_class = DefaultPagination
     permission_classes = [IsAdminOrReadOnly]
     search_fields = ['title', 'description']
