@@ -227,5 +227,19 @@ CELERY_BEAT_SCHEDULE = {
     }
 }
 
+#########################################################################################
+# ADD : cache
+# - Note : we use database number 2 as 1 is used by celery
+#########################################################################################
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/2",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
 
 #########################################################################################

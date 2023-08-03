@@ -2,7 +2,8 @@ from locust import HttpUser, task, between
 from random import randint
 
 ######################################################################################
-#  locust -g locustfiles/browse_products.py
+# Locust for performance testing 
+# RUN : locust -g locustfiles/browse_products.py
 ######################################################################################
 
 class WebsiteUser(HttpUser):
@@ -39,6 +40,11 @@ class WebsiteUser(HttpUser):
             name='/store/carts/items',
             json={'product_id':product_id, 'quantity':1}
         )
+    
+    # Simulate slow response 
+    @task 
+    def slow_call(self):
+        self.client.get('/playground/slow_api/')
     
     # lifecycle hook
     def on_start(self):
