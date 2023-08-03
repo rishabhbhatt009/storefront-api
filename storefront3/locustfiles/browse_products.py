@@ -3,7 +3,7 @@ from random import randint
 
 ######################################################################################
 # Locust for performance testing 
-# RUN : locust -g locustfiles/browse_products.py
+# RUN : locust -f browse_products.py
 ######################################################################################
 
 class WebsiteUser(HttpUser):
