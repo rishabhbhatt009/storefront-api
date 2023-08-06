@@ -7,7 +7,9 @@ from django.core.mail import send_mail, mail_admins, EmailMessage, BadHeaderErro
 from templated_mail.mail import BaseEmailMessage
 from .tasks import notify_customers
 import requests
+import logging
 
+logger = logging.getLogger(__name__)
 
 #######################################################################################
 # sending emails 
@@ -106,13 +108,21 @@ def message_broker(request):
 
 # -------------------------------------------------------------------------------------
 # Implementing cache on class based views
+# Logging : 
+#   - Shouldn't be verbose 
+#   - Dont write sensitive information in logs
 # -------------------------------------------------------------------------------------
 
 # class based view 
 class slow_api(APIView):
-    @method_decorator(cache_page(5*60))
+    # @method_decorator(cache_page(5*60))
     def get(self, request):
-        response = requests.get('https://httpbin.org/delay/2')
+        try :
+            logger.info('Calling httpbin')
+            response = requests.get('https://httpbin.org/delay/2')
+            logger.info('Received the response')
+        except requests.ConnectionError:
+            logger.critical('httpbin is offline')
         data = response.json()
         return render(request, 'hello.html', {'name': data})
 

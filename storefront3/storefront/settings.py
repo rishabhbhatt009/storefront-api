@@ -249,3 +249,53 @@ CACHES = {
 }
 
 #########################################################################################
+# ADD : Logging 
+# Log messages have a severity 
+# - SEVERITY : DEBUG, INFO, WARNING, ERROR, CRITICAL 
+# - severity increases as we go through the list
+#########################################################################################
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    
+    'handlers': {
+        # handler-1 
+        'console': {
+            'class': 'logging.StreamHandler'
+        },
+        # handler-2
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'general.log',
+            'formatter': 'verbose'
+        }
+    },
+    
+    'loggers': {
+        # capture any log messages from the playground app 
+        # 'playground' : {}, 
+        
+        # capture any log messages from the playground.view module
+        # 'playground.views' : {},
+        
+        # capture all log messages
+        '' : {
+            'handlers': ['console', 'file'],
+            # only capture logs >= 'X' 
+            # instead of hard coding we use an environment variable with INFO as default
+            'level': os.environ.get('DJANGO_LOG_LEVEL', 'INFO')
+        }
+    },
+    
+    'formatters': {
+        # 'simple'
+        'verbose': {
+            'format': '{asctime} | ({levelname}) | {name} | {message}',
+            'style': '{' # str.format()
+            # 'style': '$' # sting.Template
+        }
+    }
+}
+
+#########################################################################################
