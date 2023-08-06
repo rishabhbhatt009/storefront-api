@@ -1,4 +1,7 @@
 *.pyc
+*.log
+/media/
+/static/
 # Ignore celery files 
 *.bak
 *.dat
