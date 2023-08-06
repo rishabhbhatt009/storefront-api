@@ -5,6 +5,9 @@
 2. Connect to mysql : `sudo mysql -u root -p`
 3. Run django server : `python manage.py runserver`
 
+Additional Commands : 
+- Collect static file assets : `python manage.py collectstatic` 
+
 Additional : 
 1. Upload API : 
 2. SMTP Server/Container (email) : `docker run --rm -it -p 3000:80 -p 2525:25 rnwood/smtp4dev`
