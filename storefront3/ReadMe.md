@@ -7,6 +7,7 @@
 
 Additional Commands : 
 - Collect static file assets : `python manage.py collectstatic` 
+- Run production server : `gunicorn storefront.wsgi`
 
 Additional : 
 1. Upload API : 
