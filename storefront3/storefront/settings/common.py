@@ -12,21 +12,14 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os 
 from pathlib import Path
 from datetime import timedelta
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-hs6j037urx6iav+7#10%-vu4l4f5@@-1_zo)oft4g7$vf2$jmp'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -59,6 +52,9 @@ MIDDLEWARE = [
     # added middle ware for CORS (Cross Origin Resource Sharing)
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
+    # -----------------------------------------------------------
+    # serving static assets in production 
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     # -----------------------------------------------------------
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -103,20 +99,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'storefront.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'storefront3',
-        'HOST': 'localhost',
-        'USER': 'root',
-        'PASSWORD': 'Rishabh123$'
-    }
-}
-
-
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
@@ -145,8 +127,6 @@ TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
-USE_L10N = True
-
 USE_TZ = True
 
 
@@ -154,6 +134,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+# setting static root 
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 #########################################################################################
 # ADD : media location
@@ -205,4 +187,92 @@ DEFAULT_FROM_EMAIL = 'admin@storefront.com'
 ADMINS = [
     ('admin', 'admin@storefront.com')
 ]
+
+#########################################################################################
+# ADD : Message Broker (celery) settings
+# START WORKER                  : celery -A storefront worker --loglevel=info
+# START BEAT                    : celery -A storefront beat
+# START CELERY WITH MONITORING  : celery -A storefront flower
+#########################################################################################
+
+# configuring the message broker (queue)
+CELERY_BROKER_URL = 'redis://localhost:6379/1'
+
+# configuring celery beat scheduler
+CELERY_BEAT_SCHEDULE = {
+    'notify_customers':{
+        'task': 'playground.tasks.notify_customers',
+        # 'schedule': crontab(day_of_week=1, hour=7, minute=30), # every monday on 7:30
+        # 'schedule': crontab(minute='*/30'), # every 15 minutes
+        'schedule': 5, # seconds
+        'args': ['Hello World'],
+    }
+}
+
+#########################################################################################
+# ADD : cache
+# - Note : we use database number 2 as 1 is used by celery
+#########################################################################################
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/2",
+        "TIMEOUT" : 10*60,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
+#########################################################################################
+# ADD : Logging 
+# Log messages have a severity 
+# - SEVERITY : DEBUG, INFO, WARNING, ERROR, CRITICAL 
+# - severity increases as we go through the list
+#########################################################################################
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    
+    'handlers': {
+        # handler-1 
+        'console': {
+            'class': 'logging.StreamHandler'
+        },
+        # handler-2
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'general.log',
+            'formatter': 'verbose'
+        }
+    },
+    
+    'loggers': {
+        # capture any log messages from the playground app 
+        # 'playground' : {}, 
+        
+        # capture any log messages from the playground.view module
+        # 'playground.views' : {},
+        
+        # capture all log messages
+        '' : {
+            'handlers': ['console', 'file'],
+            # only capture logs >= 'X' 
+            # instead of hard coding we use an environment variable with INFO as default
+            'level': os.environ.get('DJANGO_LOG_LEVEL', 'INFO')
+        }
+    },
+    
+    'formatters': {
+        # 'simple'
+        'verbose': {
+            'format': '{asctime} | ({levelname}) | {name} | {message}',
+            'style': '{' # str.format()
+            # 'style': '$' # sting.Template
+        }
+    }
+}
+
 #########################################################################################
